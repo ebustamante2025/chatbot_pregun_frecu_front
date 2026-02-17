@@ -1,0 +1,25 @@
+:root{
+  --hgi-blue: #001689;
+  --hgi-blue-2: #0b2aa8;
+  --hgi-green: #9acb3b;
+  --hgi-bg: #f5f7fb;
+  --hgi-card: #ffffff;
+  --hgi-text: #1b1f2a;
+  --hgi-muted: #6c7486;
+  --hgi-line: #e6e9f2;
+
+  --radius: 12px;
+  --shadow: 0 14px 30px rgba(0,0,0,.10);
+}
+
+*{ box-sizing: border-box; }
+html, body{ height:100%; }
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: var(--hgi-bg);
+  color: var(--hgi-text);
+}
+
+a{ color: inherit; text-decoration:none; }
+button{ font-family: inherit; }
