@@ -4,6 +4,15 @@ import type { FAQCategory } from "../../data/faqData";
 import { FAQSidebar } from "./FAQSidebar";
 import { FAQAccordion } from "./FAQAccordion";
 
+function getInitialParams(): { licencia: string; servicio: string } {
+  if (typeof window === "undefined") return { licencia: "", servicio: "" };
+  const p = new URLSearchParams(window.location.search);
+  return {
+    licencia: (p.get("licencia") ?? "").trim(),
+    servicio: (p.get("servicio") ?? "").trim(),
+  };
+}
+
 export function FAQPage() {
   const [categories, setCategories] = useState<FAQCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +31,27 @@ export function FAQPage() {
 
       if (data.length > 0) {
         setCategories(data);
-        setActiveCat(data[0].id);
+        const { licencia, servicio } = getInitialParams();
+        // Preseleccionar categoría por nombre de licencia (desde widget; puede venir "HGI_NÓMINA" → normalizar)
+        const licenciaNorm = licencia.replace(/\s+/g, " ").replace(/_/g, " ").trim().toLowerCase();
+        const match = licenciaNorm
+          ? data.find(
+              (c) =>
+                c.title
+                  .trim()
+                  .toLowerCase()
+                  .replace(/\s+/g, " ")
+                  .replace(/_/g, " ") === licenciaNorm ||
+                c.title
+                  .trim()
+                  .toLowerCase()
+                  .replace(/\s+/g, " ")
+                  .replace(/_/g, " ")
+                  .includes(licenciaNorm)
+            )
+          : null;
+        setActiveCat(match ? match.id : data[0].id);
+        if (servicio) setQuery(servicio);
       } else {
         setError(true);
       }
