@@ -6,13 +6,20 @@ export function FAQSidebar({
   onSelect,
   query,
   setQuery,
+  soloMostrarServicioId = null,
 }: {
   categories: FAQCategory[];
   activeId: string;
   onSelect: (id: string) => void;
   query: string;
   setQuery: (v: string) => void;
+  /** Si está definido (llegó desde el chatbot con un servicio), solo se muestra ese botón; los demás se ocultan */
+  soloMostrarServicioId?: string | null;
 }) {
+  const serviciosVisibles = soloMostrarServicioId
+    ? categories.filter((c) => c.id === soloMostrarServicioId)
+    : categories;
+
   return (
     <aside className="card sidebar">
       <div className="sidebarTitle">Preguntas frecuentes</div>
@@ -31,7 +38,7 @@ export function FAQSidebar({
       </div>
 
       <div className="sideGroup">
-        {categories.map((c) => (
+        {serviciosVisibles.map((c) => (
           <button
             key={c.id}
             className={`sideItem ${c.id === activeId ? "isActive" : ""}`}

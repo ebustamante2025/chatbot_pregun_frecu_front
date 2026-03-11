@@ -4,8 +4,18 @@ export type FAQCategory = { id: string; title: string; items: FAQQuestion[] };
 type TemaApi = { id: number; nombre: string; estado: boolean };
 type PreguntaApi = { id: number; tema_id: number; pregunta: string; respuesta: string; estado: boolean };
 
-// URL del backend API (en Docker, nginx hace proxy de /api al backend)
-const API_URL = import.meta.env.VITE_API_URL || "";
+// URL del backend API. Vacío = mismo origen (proxy /api). Si no está definida, backend en contenedor = 3001.
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+
+/** Valida el token de acceso a FAQ (emitido tras validar NIT + usuario en el chatbot). Devuelve true si el token es válido. */
+export async function validarAccesoFAQ(token: string): Promise<boolean> {
+  const base = API_URL.replace(/\/api\/?$/, "");
+  const url = `${base}/api/faq-acceso/validar?token=${encodeURIComponent(token)}`;
+  const res = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
+  if (!res.ok) return false;
+  const data = (await res.json()) as { ok?: boolean };
+  return data?.ok === true;
+}
 
 /** Decodifica la respuesta como UTF-8 para evitar ?? en tildes y ñ */
 async function responseJsonUtf8(res: Response): Promise<unknown> {

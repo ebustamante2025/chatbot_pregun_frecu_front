@@ -363,6 +363,35 @@
   font-weight: 950;
   color: #1f2535;
 }
+
+/* Servicio filtrado desde el chatbot */
+.contentHeader-fromChatbot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.contentHeader-fromChatbot h2 {
+  margin: 0;
+}
+.contentHeader-badge {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(0, 22, 137, 0.1);
+  color: #001689;
+  font-size: 12px;
+  font-weight: 700;
+}
+.contentHeader-servicio {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #6c7486;
+}
+.contentHeader-servicio strong {
+  color: #1f2535;
+}
+
 .meta{
   color: #6c7486;
   font-size: 13px;
