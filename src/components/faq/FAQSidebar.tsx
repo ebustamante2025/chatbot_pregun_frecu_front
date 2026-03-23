@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { FAQCategory } from "../../data/faqData";
 
 export function FAQSidebar({
@@ -6,13 +7,23 @@ export function FAQSidebar({
   onSelect,
   query,
   setQuery,
+  soloMostrarServicioId = null,
 }: {
   categories: FAQCategory[];
   activeId: string;
   onSelect: (id: string) => void;
   query: string;
   setQuery: (v: string) => void;
+  /** Si viene del chatbot con servicio coincidente, solo se lista ese tema en el lateral */
+  soloMostrarServicioId?: string | null;
 }) {
+  const categoriesToShow = useMemo(() => {
+    if (soloMostrarServicioId == null || soloMostrarServicioId === "") {
+      return categories;
+    }
+    return categories.filter((c) => c.id === soloMostrarServicioId);
+  }, [categories, soloMostrarServicioId]);
+
   return (
     <aside className="card sidebar">
       <div className="sidebarTitle">Preguntas frecuentes</div>
@@ -31,7 +42,7 @@ export function FAQSidebar({
       </div>
 
       <div className="sideGroup">
-        {categories.map((c) => (
+        {categoriesToShow.map((c) => (
           <button
             key={c.id}
             className={`sideItem ${c.id === activeId ? "isActive" : ""}`}
