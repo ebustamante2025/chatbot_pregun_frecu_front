@@ -3,6 +3,7 @@ version: '3.8'
 # Preguntas Frecuentes Frontend - Requiere que api-backend esté corriendo
 # Se conecta a la red crm-chatbot-network (creada por chatbot_api_backend)
 
+
 services:
   preguntas-frecuentes-front:
     build:
@@ -12,6 +13,8 @@ services:
     container_name: preguntas-frecuentes-front
     ports:
       - "3008:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - crm-chatbot-network
     restart: unless-stopped

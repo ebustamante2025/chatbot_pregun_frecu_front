@@ -4,10 +4,21 @@ export type FAQCategory = { id: string; title: string; items: FAQQuestion[] };
 type TemaApi = { id: number; nombre: string; estado: boolean };
 type PreguntaApi = { id: number; tema_id: number; pregunta: string; respuesta: string; estado: boolean };
 
-// URL del backend API. Vacío = mismo origen (proxy /api). Si no está definida, backend en contenedor = 3001.
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+// URL del backend API (en Docker, nginx hace proxy de /api al backend)
+const API_URL = import.meta.env.VITE_API_URL || "";
 
-/** Valida el token de acceso a FAQ (emitido tras validar NIT + usuario en el chatbot). Devuelve true si el token es válido. */
+/** Canjea ?otk=... (un solo uso) por el JWT. */
+export async function canjearHandoffFAQ(otk: string): Promise<string | null> {
+  const base = API_URL.replace(/\/api\/?$/, "");
+  const url = `${base}/api/faq-acceso/handoff/${encodeURIComponent(otk)}`;
+  const res = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
+  if (!res.ok) return null;
+  const data = (await res.json()) as { success?: boolean; token?: string };
+  if (data?.success && typeof data?.token === "string") return data.token;
+  return null;
+}
+
+/** Valida el token de acceso a FAQ (NIT + usuario). Devuelve true si el token es válido. */
 export async function validarAccesoFAQ(token: string): Promise<boolean> {
   const base = API_URL.replace(/\/api\/?$/, "");
   const url = `${base}/api/faq-acceso/validar?token=${encodeURIComponent(token)}`;

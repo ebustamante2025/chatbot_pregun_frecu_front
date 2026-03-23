@@ -4,7 +4,7 @@ import "./styles/site.css";
 import { HeroStrip } from "./components/layout/HeroStrip";
 import { PageShell } from "./components/layout/PageShell";
 import { FAQPage } from "./components/faq/FAQPage";
-import { validarAccesoFAQ } from "./data/faqData";
+import { validarAccesoFAQ, canjearHandoffFAQ } from "./data/faqData";
 
 const FAQ_ACCESS_TOKEN_KEY = "faq_access_token";
 
@@ -12,6 +12,12 @@ function getTokenFromUrl(): string | null {
   if (typeof window === "undefined") return null;
   const p = new URLSearchParams(window.location.search);
   return p.get("token")?.trim() || null;
+}
+
+function getOtkFromUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  const p = new URLSearchParams(window.location.search);
+  return p.get("otk")?.trim() || null;
 }
 
 /**
@@ -23,16 +29,32 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    const token =
-      getTokenFromUrl() ||
-      (typeof window !== "undefined" ? window.sessionStorage.getItem(FAQ_ACCESS_TOKEN_KEY) : null);
 
-    if (!token) {
-      setAccesoPermitido(false);
-      return;
-    }
+    (async () => {
+      let token: string | null = null;
+      const otk = getOtkFromUrl();
+      if (otk) {
+        token = await canjearHandoffFAQ(otk);
+        if (token && typeof window !== "undefined") {
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("otk");
+            window.history.replaceState({}, "", url.pathname + (url.search || "") + (url.hash || ""));
+          } catch (_) {}
+        }
+      }
+      if (!token) {
+        token =
+          getTokenFromUrl() ||
+          (typeof window !== "undefined" ? window.sessionStorage.getItem(FAQ_ACCESS_TOKEN_KEY) : null);
+      }
 
-    validarAccesoFAQ(token).then((ok) => {
+      if (!token) {
+        if (!cancelled) setAccesoPermitido(false);
+        return;
+      }
+
+      const ok = await validarAccesoFAQ(token);
       if (cancelled) return;
       setAccesoPermitido(ok);
       if (ok) {
@@ -40,11 +62,11 @@ export default function App() {
           window.sessionStorage.setItem(FAQ_ACCESS_TOKEN_KEY, token);
           const url = new URL(window.location.href);
           url.searchParams.delete("token");
-          const newUrl = url.pathname + (url.search || "") + (url.hash || "");
-          window.history.replaceState({}, "", newUrl);
+          url.searchParams.delete("otk");
+          window.history.replaceState({}, "", url.pathname + (url.search || "") + (url.hash || ""));
         } catch (_) {}
       }
-    });
+    })();
 
     return () => {
       cancelled = true;
