@@ -3,3 +3,10 @@ dist
 .git
 .gitignore
 README.md
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+!.env.example
+!.env.development.example
